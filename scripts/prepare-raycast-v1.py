@@ -20,14 +20,16 @@ def main():
         return
     # Official legacy download page links to this endpoint. The checksum locks
     # the resulting cask to these bytes even if the vendor later changes it.
-    url = 'https://releases.raycast.com/download'
+    url = f'https://releases.raycast.com/releases/{VERSION}/download?build=x86_64'
     with tempfile.TemporaryDirectory() as temp:
         dmg = Path(temp) / 'Raycast.dmg'
         digest = hashlib.sha256()
-        with urllib.request.urlopen(url, timeout=120) as response, dmg.open('wb') as output:
-            while chunk := response.read(1024 * 1024):
+        run('curl', '--fail', '--location', '--retry', '3', '--max-time', '300',
+            '--user-agent', 'Homebrew/7.0 (Macintosh; Intel Mac OS X)',
+            '--output', str(dmg), url)
+        with dmg.open('rb') as source:
+            while chunk := source.read(1024 * 1024):
                 digest.update(chunk)
-                output.write(chunk)
         mount = Path(temp) / 'mount'
         mount.mkdir()
         run('hdiutil', 'attach', '-readonly', '-nobrowse', '-mountpoint', str(mount), str(dmg))
