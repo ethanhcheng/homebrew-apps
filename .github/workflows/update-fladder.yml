@@ -1,0 +1,35 @@
+name: Update Fladder
+on:
+  schedule:
+    - cron: '23 12 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: update-fladder
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Download and validate stable release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/update-fladder.py
+      - name: Validate Ruby syntax
+        run: ruby -c Casks/fladder.rb
+      - name: Commit validated cask update
+        run: |
+          if git diff --quiet -- Casks/fladder.rb; then
+            echo "Cask is already current."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Casks/fladder.rb
+          git commit -m 'Update Fladder to latest validated stable release'
+          git push origin HEAD:main
