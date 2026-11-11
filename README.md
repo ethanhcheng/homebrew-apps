@@ -2,22 +2,9 @@
 
 Fladder cask, downloaded directly from DonutWare/Fladder. Initial version and checksum come from the upstream v0.11.1 release metadata.
 
-## Publish once
+## Repository setup
 
-Create an empty public repository named `homebrew-apps` at https://github.com/new under `ethanhcheng`. Do not initialize it with a README, license, or gitignore. Then run in Terminal:
-
-```sh
-cd ~/homebrew-apps
-git init -b main
-git add Casks scripts .github README.md
-git -c user.name=ethanhcheng -c user.email=157773553+ethanhcheng@users.noreply.github.com commit -m "Add Fladder cask and automatic release updates"
-git remote add origin https://github.com/ethanhcheng/homebrew-apps.git
-git push -u origin main
-```
-
-Git will require GitHub authentication (a token or credential helper; account passwords do not work). Alternatively upload the files through GitHub, preserving the `.github/workflows/` directory.
-
-In the repository's Actions tab, enable Actions if prompted. Select **Update Fladder → Run workflow**. Wait for a successful run before installing. This first run downloads the DMG and verifies the initial checksum and Intel executable. Subsequent runs occur daily and commit version/checksum changes directly to main. No separate secret or PR approval is needed; the repository's GITHUB_TOKEN is used. Branch protection requiring PRs will prevent direct updates. Scheduled workflows in inactive public repositories may be disabled after 60 days; re-enable them in Actions if GitHub notifies you.
+The repository has already been published. Fladder's first validation workflow passed. Its updater checks daily.
 
 ## Install on this Mac
 
@@ -53,3 +40,18 @@ To check manually, run `python3 scripts/update-fladder.py` on a Mac with interne
 ## Local validation status
 
 Python and Ruby syntax checked. Live DMG validation and the hosted workflow have not been run from the restricted Codex session. Run the workflow once after publishing before adopting the app.
+
+## Raycast v1 for Intel
+
+The **Prepare fixed Raycast v1 cask** workflow downloads the official legacy DMG, requires version 1.104.35, verifies Intel support and the Raycast signing team, computes SHA-256, and publishes Casks/raycast@1.rb. It runs when its setup files change or through Actions → Run workflow. It does not automatically track newer releases. Once the cask exists, reruns leave it unchanged.
+
+After that workflow succeeds, quit Raycast and run:
+
+```sh
+brew update
+brew install --cask --adopt ethanhcheng/apps/raycast@1
+```
+
+If adoption refuses a different bundle, keep the existing app until you have backed it up before any replacement. There are no zap or uninstall hooks. Homebrew will not upgrade this cask to Raycast v2. The cask does not disable Raycast's own in-app updater.
+
+The vendor's legacy URL is not versioned. The fixed checksum ensures that a changed download fails rather than silently installs a different version. If the vendor stops serving these bytes, a reviewed URL/checksum update is required. The workflow checks Intel support in the main executable, not every framework or app feature.
