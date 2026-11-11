@@ -54,4 +54,4 @@ brew install --cask --adopt ethanhcheng/apps/raycast@1
 
 If adoption refuses a different bundle, keep the existing app until you have backed it up before any replacement. There are no zap or uninstall hooks. Homebrew will not upgrade this cask to Raycast v2. The cask does not disable Raycast's own in-app updater.
 
-The vendor's legacy URL is not versioned. The fixed checksum ensures that a changed download fails rather than silently installs a different version. If the vendor stops serving these bytes, a reviewed URL/checksum update is required. The workflow checks Intel support in the main executable, not every framework or app feature.
+The cask uses the vendor's version-specific Intel download URL. Its fixed checksum ensures that a changed download fails rather than silently installs a different version. If the vendor stops serving these bytes, a reviewed URL/checksum update is required. The workflow checks Intel support in the main executable, not every framework or app feature.
