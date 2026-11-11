@@ -1,0 +1,35 @@
+name: Prepare fixed Raycast v1 cask
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/prepare-raycast-v1.py
+      - .github/workflows/prepare-raycast-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: prepare-raycast-v1
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Validate official v1 download and generate fixed cask
+        run: python3 scripts/prepare-raycast-v1.py
+      - name: Publish validated cask
+        run: |
+          git add Casks/raycast@1.rb
+          if git diff --cached --quiet; then
+            echo 'Fixed cask is already published.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Add verified Raycast 1.104.35 cask for Intel'
+          git pull --rebase origin main
+          git push origin HEAD:main
